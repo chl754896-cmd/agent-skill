@@ -10,6 +10,11 @@ on:
         required: true
         default: "今天下雨了。今天下雨了。我带了雨伞。"
         type: string
+      use_ai:
+        description: "是否启用 AI 语义审核"
+        required: true
+        default: false
+        type: boolean
 
 jobs:
   test:
@@ -24,11 +29,15 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: 安装依赖
+        run: python -m pip install -r requirements.txt
+
       - name: 运行自动测试
         run: python -m unittest test_review.py -v
 
   generate-report:
     if: github.event_name == 'workflow_dispatch'
+    needs: test
     runs-on: ubuntu-latest
 
     steps:
@@ -40,13 +49,25 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: 安装依赖
+        run: python -m pip install -r requirements.txt
+
       - name: 生成审核报告
         env:
           REVIEW_TEXT: ${{ inputs.text }}
-        run: python review.py "$REVIEW_TEXT" --output report.txt
+          USE_AI: ${{ inputs.use_ai }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: |
+          if [ "$USE_AI" = "true" ]; then
+            python review.py "$REVIEW_TEXT" --ai --output report.md --json result.json
+          else
+            python review.py "$REVIEW_TEXT" --output report.md --json result.json
+          fi
 
       - name: 上传审核报告
         uses: actions/upload-artifact@v7
         with:
-          name: text-review-report
-          path: report.txt
+          name: text-review-result
+          path: |
+            report.md
+            result.json
