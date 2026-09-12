@@ -39,7 +39,7 @@ def main():
     print("输入检查：通过")
 
     # 根据用户输入的字符数量，给出最简单的长度检查结果。
-    if len(text) < 10:
+    if len(text) < 2:
         print("长度检查：文本过短")
     elif len(text) <= 100:
         print("长度检查：正常")
