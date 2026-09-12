@@ -4,6 +4,12 @@ on:
   push:
   pull_request:
   workflow_dispatch:
+    inputs:
+      text:
+        description: "请输入需要审核的文本"
+        required: true
+        default: "今天下雨了。今天下雨了。我带了雨伞。"
+        type: string
 
 jobs:
   test:
@@ -20,3 +26,27 @@ jobs:
 
       - name: 运行自动测试
         run: python -m unittest test_review.py -v
+
+  generate-report:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 获取项目代码
+        uses: actions/checkout@v7
+
+      - name: 配置 Python 3.12
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: 生成审核报告
+        env:
+          REVIEW_TEXT: ${{ inputs.text }}
+        run: python review.py "$REVIEW_TEXT" --output report.txt
+
+      - name: 上传审核报告
+        uses: actions/upload-artifact@v7
+        with:
+          name: text-review-report
+          path: report.txt
