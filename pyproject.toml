@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "evalforge"
+version = "0.1.0"
+description = "Lightweight evaluation tooling for Agent Skills."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+dependencies = ["PyYAML>=6.0", "openai>=1.0.0"]
+
+[project.scripts]
+evalforge = "evalforge.cli:main"
+
+[tool.setuptools]
+packages = ["evalforge"]

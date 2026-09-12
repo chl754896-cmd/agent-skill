@@ -1,5 +1,10 @@
 __pycache__/
 *.pyc
+*.egg-info/
 .env
 report.md
 result.json
+eval_cases.json
+eval_results.json
+eval_report.md
+eval_report.json

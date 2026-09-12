@@ -1,83 +1,88 @@
-# Text Review Workflow
+# EvalForge
 
-一个面向学习和实践的文本审核项目。它先使用可解释的 Python 规则检查文本，再可选地使用 DeepSeek AI 语义审核，最后生成 Markdown 报告和 JSON 结果。
+EvalForge is a lightweight evaluation toolkit for Agent Skills: parse a `SKILL.md`, extract capabilities, generate test cases, score responses, classify badcases, and produce reports.
 
-## Workflow 架构
+## What is EvalForge?
+
+EvalForge turns a written Skill specification into an executable V0.1 evaluation workflow. It works offline by default and can optionally use DeepSeek to enrich analysis and case generation.
+
+## Why EvalForge?
+
+Agent Skills often describe requirements in prose. EvalForge makes those requirements testable, traceable, and reportable without a large agent platform.
+
+## Workflow
 
 ```text
-用户文本
-  ↓
-输入校验
-  ↓
-Python 规则审核
-  ↓
-DeepSeek AI 语义审核（可选）
-  ↓
-合并审核结果与综合评分
-  ↓
-Markdown 报告 / JSON 结果
-  ↓
-GitHub Actions / Artifact
+Skill → Parse → Capabilities → Test Cases → Evaluation → Badcases → Report
 ```
 
-## 当前功能
+## Features
 
-- 空文本检查、文本长度检查、重复句子检查。
-- 结构化规则审核结果。
-- 可选 AI 语义审核：表达清晰度、语病、逻辑、结构、冗余和修改建议。
-- `0-100` 综合评分与 `pass`、`warning`、`fail` 状态。
-- Markdown 报告和 UTF-8 JSON 结果。
-- GitHub Actions 自动测试，以及手动生成报告 Artifact。
+- Parse skill name, description, inputs, outputs, rules, constraints, prohibitions, and examples.
+- Extract seven baseline evaluation capabilities.
+- Generate normal, boundary, constraint, conflict, missing-information, and format cases.
+- Score six rubric dimensions on a 0–100 scale.
+- Classify failures with a clear Badcase taxonomy.
+- Generate Markdown and JSON reports.
+- Use optional DeepSeek AI assistance through one centralized integration point.
 
-## 本地运行
-
-安装依赖：
+## Quick Start
 
 ```bash
-python -m pip install -r requirements.txt
+pip install -e .
+evalforge analyze examples/resume-review
+evalforge generate examples/resume-review
+evalforge evaluate eval_cases.json
+evalforge report eval_results.json
 ```
 
-仅运行规则审核：
+## CLI
+
+```text
+evalforge analyze <skill_path> [--use-ai]
+evalforge generate <skill_path> [--use-ai] [--output eval_cases.json]
+evalforge evaluate <cases_path> [--responses responses.json] [--output eval_results.json]
+evalforge report <results_path> [--markdown-output eval_report.md] [--json-output eval_report.json]
+```
+
+## Example
+
+`examples/resume-review/` is a simple resume-review Skill. `examples/text-review/` preserves the earlier Text Review Demo as the first runnable workflow example.
+
+## Badcase Taxonomy
+
+`instruction_following`, `constraint_violation`, `missing_information`, `format_error`, `accuracy_error`, `hallucination`, `logic_error`, `incomplete_answer`, `redundancy`, `robustness_failure`, and `other`.
+
+## DeepSeek AI Mode
+
+The baseline works without any API key. To enable optional AI assistance:
 
 ```bash
-python review.py "今天下雨了。今天下雨了。我带了雨伞。" --output report.md --json result.json
+export DEEPSEEK_API_KEY="your-key"
+export DEEPSEEK_MODEL="deepseek-v4-flash"  # optional override
+evalforge generate examples/resume-review --use-ai
 ```
 
-## AI 模式
+EvalForge uses the OpenAI Python SDK with the DeepSeek endpoint. Keys are read only from `DEEPSEEK_API_KEY`; never commit them.
 
-AI 模式使用 OpenAI Python SDK 连接 DeepSeek 的 Responses API。默认模型为 `deepseek-v4-flash`，也可通过 `DEEPSEEK_MODEL` 修改模型。
+## GitHub Actions
 
-```bash
-export DEEPSEEK_API_KEY="你的 DeepSeek API Key"
-python review.py "需要审核的文本" --ai --output report.md --json result.json
+Push and pull-request runs install the package and execute offline unit tests. Manual runs accept `skill_path` and `use_ai`; when AI is enabled, the workflow reads the `DEEPSEEK_API_KEY` repository secret and uploads an `evalforge-result` Artifact.
+
+## Project Structure
+
+```text
+evalforge/       core parser, generator, evaluator, rubric, analyzer, reporter, CLI
+examples/        runnable example Skills and workflows
+tests/           offline unit tests
+evals/           self-evaluation configuration
 ```
 
-Windows PowerShell：
+## Roadmap
 
-```powershell
-$env:DEEPSEEK_API_KEY = "你的 DeepSeek API Key"
-python review.py "需要审核的文本" --ai --output report.md --json result.json
-```
+- V0.1: deterministic Skill evaluation baseline.
+- Next: richer AI-generated cases, judge calibration, and configurable Rubrics.
 
-API Key 只从环境变量 `DEEPSEEK_API_KEY` 读取；请勿写入代码、提交到 Git，或记录到日志。没有 API Key 时，`--ai` 会跳过 AI 审核并继续保留规则审核结果。
+## License
 
-## 测试
-
-```bash
-python -m unittest test_review.py -v
-```
-
-测试使用 mock 模拟 DeepSeek Responses API 调用，不会调用真实 API，也不会产生 API 费用。
-
-## GitHub Actions 与 Artifact
-
-- `push` 和 `pull_request`：安装依赖并只运行自动测试。
-- 手动运行 `Text Review Tests`：填写 `text`，可选择 `use_ai`。
-- 勾选 `use_ai` 时，Workflow 从 GitHub Secret `DEEPSEEK_API_KEY` 读取密钥。
-- 完成后，在运行记录的 **Artifacts** 区域下载 `text-review-result`，其中包含 `report.md` 和 `result.json`。
-
-## 项目路线图
-
-- V1：规则审核、结构化结果和 GitHub Actions。
-- V2：可选 DeepSeek AI 语义审核、综合评分和双格式报告。
-- 后续：优化提示词、增加人工反馈、扩展规则与报告展示。
+MIT. See [LICENSE](LICENSE).

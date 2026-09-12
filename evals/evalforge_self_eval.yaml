@@ -1,0 +1,14 @@
+name: EvalForge self evaluation
+version: "0.1"
+capabilities:
+  - parsing
+  - capability extraction
+  - testcase generation
+  - rubric scoring
+  - badcase classification
+  - reporting
+  - cli usability
+criteria:
+  - Each capability has an executable unit test.
+  - Core commands work without DEEPSEEK_API_KEY.
+  - Reports include summary, capability scores, failed cases and recommendations.
