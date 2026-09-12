@@ -36,6 +36,14 @@ evalforge evaluate eval_cases.json
 evalforge report eval_results.json
 ```
 
+## Offline Rule Baseline
+
+Without an API key, EvalForge performs deterministic Skill parsing, baseline capability extraction, six core Case types, rule-based Rubric scoring, Badcase classification, and report generation. This mode is intended to make the project usable and testable without network access.
+
+## DeepSeek AI-Assisted Mode
+
+With `--use-ai` and `DEEPSEEK_API_KEY`, DeepSeek can supplement capability extraction, add validated test Cases, and act as an independent Judge. AI output is validated before use; missing keys, failed requests, or invalid payloads automatically fall back to the offline rule baseline.
+
 ## CLI
 
 ```text
@@ -64,6 +72,21 @@ evalforge generate examples/resume-review --use-ai
 ```
 
 EvalForge uses the OpenAI Python SDK with the DeepSeek endpoint. Keys are read only from `DEEPSEEK_API_KEY`; never commit them.
+
+## V0.1 Limitations
+
+- The offline Rubric is a deterministic rule baseline, not a semantic Judge.
+- Offline accuracy scoring is necessarily limited because it cannot verify external facts.
+- A complete evaluation requires a `responses.json` file containing actual model responses.
+- DeepSeek mode enhances capability extraction, Case generation, and judging, but it does not replace human review of high-stakes evaluations.
+
+## Complete CLI Demo
+
+```bash
+evalforge generate examples/resume-review
+evalforge evaluate eval_cases.json --responses examples/resume-review/responses.json
+evalforge report eval_results.json
+```
 
 ## GitHub Actions
 

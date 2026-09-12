@@ -7,11 +7,12 @@ from pathlib import Path
 
 def build_report(evaluation):
     results = evaluation.get("results", [])
-    statuses = Counter(item["rubric"]["status"] for item in results)
-    scores = [item["rubric"]["overall_score"] for item in results]
+    rubrics = [item.get("final_rubric") or item.get("rubric") or item.get("rule_rubric") for item in results]
+    statuses = Counter(rubric["status"] for rubric in rubrics)
+    scores = [rubric["overall_score"] for rubric in rubrics]
     capabilities = {}
-    for item in results:
-        for name, score in item["rubric"]["dimension_scores"].items():
+    for rubric in rubrics:
+        for name, score in rubric["dimension_scores"].items():
             capabilities.setdefault(name, []).append(score)
     capability_scores = {name: round(sum(values) / len(values)) for name, values in capabilities.items()}
     badcases = [item["badcase"] for item in results if item["badcase"]]

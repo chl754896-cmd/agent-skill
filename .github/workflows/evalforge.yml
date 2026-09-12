@@ -15,6 +15,11 @@ on:
         required: true
         default: false
         type: boolean
+      responses_path:
+        description: "可选的模型响应 JSON 文件路径"
+        required: false
+        default: "examples/resume-review/responses.json"
+        type: string
 
 jobs:
   test:
@@ -55,6 +60,7 @@ jobs:
       - name: 分析并生成评测 Case
         env:
           SKILL_PATH: ${{ inputs.skill_path }}
+          RESPONSES_PATH: ${{ inputs.responses_path }}
           USE_AI: ${{ inputs.use_ai }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
         run: |
@@ -67,9 +73,20 @@ jobs:
           fi
 
       - name: 生成评测报告
+        env:
+          RESPONSES_PATH: ${{ inputs.responses_path }}
+          USE_AI: ${{ inputs.use_ai }}
         run: |
-          evalforge evaluate eval_cases.json
-          evalforge report eval_results.json
+          if [ -n "$RESPONSES_PATH" ] && [ -f "$RESPONSES_PATH" ]; then
+            if [ "$USE_AI" = "true" ]; then
+              evalforge evaluate eval_cases.json --responses "$RESPONSES_PATH" --use-ai
+            else
+              evalforge evaluate eval_cases.json --responses "$RESPONSES_PATH"
+            fi
+            evalforge report eval_results.json
+          else
+            echo "未提供模型响应，跳过 evaluate/report"
+          fi
 
       - name: 上传审核报告
         uses: actions/upload-artifact@v7
@@ -79,3 +96,4 @@ jobs:
             eval_cases.json
             eval_report.md
             eval_report.json
+          if-no-files-found: warn

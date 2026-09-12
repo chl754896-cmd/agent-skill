@@ -159,3 +159,97 @@ class EvalForgeTest(unittest.TestCase):
         self.assertEqual(result["status"], "success")
         factory.assert_called_once_with(api_key="test-key", base_url="https://api.deepseek.com")
         client.responses.create.assert_called_once()
+
+    def test_cli_evaluate(self):
+        with tempfile.TemporaryDirectory() as directory:
+            cases_path = Path(directory) / "cases.json"
+            responses_path = Path(directory) / "responses.json"
+            results_path = Path(directory) / "results.json"
+            cases_path.write_text(json.dumps({"cases": [{"id": "case_001", "category": "normal", "severity": "low"}]}), encoding="utf-8")
+            responses_path.write_text(json.dumps({"case_001": "这是一个足够完整的模型响应，用于通过基础评测。"}), encoding="utf-8")
+            exit_code = cli_main(["evaluate", str(cases_path), "--responses", str(responses_path), "--output", str(results_path)])
+            data = json.loads(results_path.read_text(encoding="utf-8"))
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(data["results"][0]["final_rubric"]["status"], "pass")
+
+    def test_ai_capability_merge(self):
+        ai_data = {"status": "success", "model": "mock", "data": {"capabilities": [
+            {"id": "accuracy", "name": "Accuracy", "description": "duplicate", "evidence": "x", "priority": "high"},
+            {"id": "safety", "name": "Safety", "description": "avoid harm", "evidence": "constraint", "priority": "high"},
+        ]}}
+        with tempfile.TemporaryDirectory() as directory, mock.patch("evalforge.capability.ai_json", return_value=ai_data):
+            skill = parse_skill(self.make_skill(directory))
+            result = extract_capabilities(skill, use_ai=True)
+        ids = [item["id"] for item in result["capabilities"]]
+        self.assertEqual(result["ai"]["status"], "success")
+        self.assertEqual(ids.count("accuracy"), 1)
+        self.assertIn("safety", ids)
+
+    def test_invalid_ai_capability_falls_back(self):
+        with tempfile.TemporaryDirectory() as directory, mock.patch("evalforge.capability.ai_json", return_value={"status": "success", "model": "mock", "data": {"capabilities": [{"id": "bad"}]}}):
+            result = extract_capabilities(parse_skill(self.make_skill(directory)), use_ai=True)
+        self.assertEqual(len(result["capabilities"]), 7)
+        self.assertEqual(result["ai"]["status"], "error")
+
+    def test_ai_case_merge(self):
+        ai_data = {"status": "success", "model": "mock", "data": {"cases": [
+            {"id": "case_001", "category": "normal", "input": "duplicate", "expected_behavior": "x", "capabilities": [], "severity": "low"},
+            {"id": "case_ai_001", "category": "adversarial", "input": "edge", "expected_behavior": "refuse conflict", "capabilities": ["constraint_following"], "severity": "high"},
+        ]}}
+        with tempfile.TemporaryDirectory() as directory, mock.patch("evalforge.generator.ai_json", return_value=ai_data):
+            skill = parse_skill(self.make_skill(directory))
+            result = generate_cases(skill, extract_capabilities(skill), use_ai=True)
+        self.assertEqual(len(result["cases"]), 7)
+        self.assertEqual(len({case["id"] for case in result["cases"]}), 7)
+        self.assertEqual(result["ai"]["status"], "success")
+
+    def test_invalid_ai_case_falls_back(self):
+        with tempfile.TemporaryDirectory() as directory, mock.patch("evalforge.generator.ai_json", return_value={"status": "success", "model": "mock", "data": {"cases": [{"id": "bad"}]}}):
+            skill = parse_skill(self.make_skill(directory))
+            result = generate_cases(skill, extract_capabilities(skill), use_ai=True)
+        self.assertEqual(len(result["cases"]), 6)
+        self.assertEqual(result["ai"]["status"], "error")
+
+    def test_ai_judge_final_rubric(self):
+        judge = {"status": "success", "model": "mock", "data": {
+            "dimension_scores": {"instruction_following": 85, "constraint_following": 85, "completeness": 85, "output_format": 85, "accuracy": 85, "robustness": 85},
+            "overall_score": 85, "status": "pass", "reasoning_summary": "Judge 认为符合要求。", "badcase_type": "other", "recommendation": "保持质量。",
+        }}
+        case = {"id": "case_001", "category": "normal", "severity": "low"}
+        with mock.patch("evalforge.evaluator.ai_json", return_value=judge):
+            result = evaluate_cases([case], {"case_001": ""}, use_ai=True)["results"][0]
+        self.assertEqual(result["rule_rubric"]["status"], "fail")
+        self.assertEqual(result["final_rubric"]["overall_score"], 85)
+        self.assertEqual(result["ai_judge"]["status"], "success")
+
+    def test_ai_badcase_type_is_used(self):
+        judge = {"status": "success", "model": "mock", "data": {
+            "dimension_scores": {"instruction_following": 70, "constraint_following": 70, "completeness": 70, "output_format": 70, "accuracy": 70, "robustness": 70},
+            "overall_score": 70, "status": "warning", "reasoning_summary": "逻辑链条不足。", "badcase_type": "logic_error", "recommendation": "补充推理过程。",
+        }}
+        case = {"id": "case_001", "category": "normal", "severity": "medium"}
+        with mock.patch("evalforge.evaluator.ai_json", return_value=judge):
+            result = evaluate_cases([case], {"case_001": "简短回答"}, use_ai=True)["results"][0]
+        self.assertEqual(result["badcase"]["type"], "logic_error")
+        self.assertEqual(result["badcase"]["recommendation"], "补充推理过程。")
+
+    def test_sample_responses_complete_chain(self):
+        root = Path(__file__).resolve().parents[1]
+        skill = parse_skill(root / "examples" / "resume-review")
+        cases = generate_cases(skill, extract_capabilities(skill))["cases"]
+        responses = json.loads((root / "examples" / "resume-review" / "responses.json").read_text(encoding="utf-8"))
+        report = build_report(evaluate_cases(cases, responses))
+        self.assertEqual(report["summary"]["total_cases"], 6)
+        self.assertEqual(report["summary"]["fail"], 0)
+        self.assertEqual(report["summary"]["status"] if "status" in report["summary"] else "pass", "pass")
+
+    def test_reporter_prefers_final_rubric(self):
+        evaluation = {"results": [{
+            "rule_rubric": {"dimension_scores": {"accuracy": 0}, "overall_score": 0, "status": "fail"},
+            "rubric": {"dimension_scores": {"accuracy": 0}, "overall_score": 0, "status": "fail"},
+            "final_rubric": {"dimension_scores": {"accuracy": 100}, "overall_score": 100, "status": "pass"},
+            "badcase": None,
+        }]}
+        report = build_report(evaluation)
+        self.assertEqual(report["summary"]["overall_score"], 100)
+        self.assertEqual(report["summary"]["pass"], 1)

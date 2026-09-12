@@ -26,5 +26,33 @@ def generate_cases(skill, capability_result, use_ai=False):
         })
     ai_status = {"status": "skipped"}
     if use_ai:
-        ai_status = ai_json(f"为以下 Skill 补充 JSON 测试案例：{skill.to_dict()}")
+        ai_status = ai_json(
+            "返回 JSON 对象，格式为 {cases: [...]}。每个 Case 必须包含 id、category、input、"
+            "expected_behavior、capabilities、severity（low/medium/high）。"
+            f"为以下 Skill 补充测试案例：{skill.to_dict()}"
+        )
+        if ai_status["status"] == "success":
+            payload = ai_status["data"]
+            ai_cases = payload.get("cases", []) if isinstance(payload, dict) else payload
+            if isinstance(ai_cases, list) and all(_valid_case(item) for item in ai_cases):
+                existing_ids = {item["id"] for item in cases}
+                for item in ai_cases:
+                    if item["id"] not in existing_ids:
+                        cases.append(item)
+                        existing_ids.add(item["id"])
+            else:
+                ai_status = {**ai_status, "status": "error", "data": None}
     return {"skill": skill.name, "cases": cases, "ai": ai_status}
+
+
+def _valid_case(item):
+    """验证 AI Case，避免不完整数据进入可执行评测。"""
+    required = {"id", "category", "input", "expected_behavior", "capabilities", "severity"}
+    return (
+        isinstance(item, dict)
+        and required.issubset(item)
+        and all(isinstance(item[key], str) and item[key].strip() for key in required - {"capabilities", "severity"})
+        and isinstance(item["capabilities"], list)
+        and all(isinstance(capability, str) for capability in item["capabilities"])
+        and item["severity"] in {"low", "medium", "high"}
+    )
