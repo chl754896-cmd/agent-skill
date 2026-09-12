@@ -1,0 +1,22 @@
+name: Text Review Tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 获取项目代码
+        uses: actions/checkout@v7
+
+      - name: 配置 Python 3.12
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: 运行自动测试
+        run: python -m unittest test_review.py -v
