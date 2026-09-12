@@ -96,4 +96,5 @@ jobs:
             eval_cases.json
             eval_report.md
             eval_report.json
+            eval_report.docx
           if-no-files-found: warn

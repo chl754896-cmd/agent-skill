@@ -110,10 +110,22 @@ class EvalForgeTest(unittest.TestCase):
             evaluation = evaluate_cases([], {})
             markdown_path = Path(directory) / "report.md"
             json_path = Path(directory) / "report.json"
-            write_reports(evaluation, markdown_path, json_path)
+            docx_path = Path(directory) / "report.docx"
+            write_reports(evaluation, markdown_path, json_path, docx_path)
             data = json.loads(json_path.read_text(encoding="utf-8"))
+            self.assertTrue(docx_path.is_file())
         self.assertIn("summary", data)
         self.assertIn("badcase_distribution", data)
+
+    def test_docx_report_has_delivery_sections(self):
+        with tempfile.TemporaryDirectory() as directory:
+            evaluation = evaluate_cases([], {})
+            docx_path = Path(directory) / "eval_report.docx"
+            write_reports(evaluation, Path(directory) / "eval_report.md", Path(directory) / "eval_report.json", docx_path)
+            from docx import Document
+            text = "\n".join(paragraph.text for paragraph in Document(docx_path).paragraphs)
+        self.assertIn("EvalForge Evaluation Report", text)
+        self.assertIn("Evaluation Conclusion", text)
 
     def test_cli_analyze(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -136,10 +148,12 @@ class EvalForgeTest(unittest.TestCase):
             results_path.write_text(json.dumps(evaluate_cases([], {})), encoding="utf-8")
             markdown_path = Path(directory) / "eval_report.md"
             json_path = Path(directory) / "eval_report.json"
-            exit_code = cli_main(["report", str(results_path), "--markdown-output", str(markdown_path), "--json-output", str(json_path)])
+            docx_path = Path(directory) / "eval_report.docx"
+            exit_code = cli_main(["report", str(results_path), "--markdown-output", str(markdown_path), "--json-output", str(json_path), "--docx-output", str(docx_path)])
             self.assertEqual(exit_code, 0)
             self.assertTrue(markdown_path.is_file())
             self.assertTrue(json_path.is_file())
+            self.assertTrue(docx_path.is_file())
 
     def test_without_deepseek_key_runs_baseline(self):
         with tempfile.TemporaryDirectory() as directory, mock.patch.dict(os.environ, {"DEEPSEEK_API_KEY": ""}):

@@ -45,8 +45,8 @@ def command_evaluate(args):
 
 def command_report(args):
     evaluation = json.loads(Path(args.results_path).read_text(encoding="utf-8"))
-    write_reports(evaluation, args.markdown_output, args.json_output)
-    print(f"已生成报告：{args.markdown_output}、{args.json_output}")
+    write_reports(evaluation, args.markdown_output, args.json_output, args.docx_output)
+    print(f"已生成报告：{args.markdown_output}、{args.json_output}、{args.docx_output}")
     return 0
 
 
@@ -72,6 +72,7 @@ def build_parser():
     report.add_argument("results_path")
     report.add_argument("--markdown-output", default="eval_report.md")
     report.add_argument("--json-output", default="eval_report.json")
+    report.add_argument("--docx-output", default="eval_report.docx")
     report.set_defaults(handler=command_report)
     return parser
 

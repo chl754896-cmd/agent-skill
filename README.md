@@ -23,7 +23,7 @@ Skill → Parse → Capabilities → Test Cases → Evaluation → Badcases → 
 - Generate normal, boundary, constraint, conflict, missing-information, and format cases.
 - Score six rubric dimensions on a 0–100 scale.
 - Classify failures with a clear Badcase taxonomy.
-- Generate Markdown and JSON reports.
+- Generate Markdown, JSON, and delivery-ready Word (`.docx`) reports.
 - Use optional DeepSeek AI assistance through one centralized integration point.
 
 ## Quick Start
@@ -50,7 +50,7 @@ With `--use-ai` and `DEEPSEEK_API_KEY`, DeepSeek can supplement capability extra
 evalforge analyze <skill_path> [--use-ai]
 evalforge generate <skill_path> [--use-ai] [--output eval_cases.json]
 evalforge evaluate <cases_path> [--responses responses.json] [--output eval_results.json]
-evalforge report <results_path> [--markdown-output eval_report.md] [--json-output eval_report.json]
+evalforge report <results_path> [--markdown-output eval_report.md] [--json-output eval_report.json] [--docx-output eval_report.docx]
 ```
 
 ## Example
@@ -88,9 +88,19 @@ evalforge evaluate eval_cases.json --responses examples/resume-review/responses.
 evalforge report eval_results.json
 ```
 
+The `report` command writes all three compatible formats by default:
+
+```text
+eval_report.md
+eval_report.json
+eval_report.docx
+```
+
+Use `eval_report.md` for a quick readable summary, `eval_report.json` for further automation, and `eval_report.docx` for sharing or formal delivery.
+
 ## GitHub Actions
 
-Push and pull-request runs install the package and execute offline unit tests. Manual runs accept `skill_path` and `use_ai`; when AI is enabled, the workflow reads the `DEEPSEEK_API_KEY` repository secret and uploads an `evalforge-result` Artifact.
+Push and pull-request runs install the package and execute offline unit tests. Manual runs accept `skill_path` and `use_ai`; when AI is enabled, the workflow reads the `DEEPSEEK_API_KEY` repository secret and uploads an `evalforge-result` Artifact containing the generated Case file plus Markdown, JSON, and Word reports.
 
 ## Project Structure
 

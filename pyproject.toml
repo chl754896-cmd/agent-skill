@@ -9,7 +9,7 @@ description = "Lightweight evaluation tooling for Agent Skills."
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
-dependencies = ["PyYAML>=6.0", "openai>=1.0.0"]
+dependencies = ["PyYAML>=6.0", "openai>=1.0.0", "python-docx>=1.1.2"]
 
 [project.scripts]
 evalforge = "evalforge.cli:main"
