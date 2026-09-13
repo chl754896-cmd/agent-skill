@@ -16,6 +16,7 @@ from evalforge.generator import generate_cases
 from evalforge.parser import SkillNotFoundError, parse_skill
 from evalforge.reporter import build_report, markdown_report, write_reports
 from evalforge.rubric import score_response, status_from_score
+from evalforge.skill_analyzer import DIMENSIONS as STATIC_DIMENSIONS, analyze_skill, extract_skill_profile
 
 
 SKILL_TEXT = """---
@@ -267,3 +268,119 @@ class EvalForgeTest(unittest.TestCase):
         report = build_report(evaluation)
         self.assertEqual(report["summary"]["overall_score"], 100)
         self.assertEqual(report["summary"]["pass"], 1)
+
+    def test_static_analysis_has_ten_complete_dimensions(self):
+        with tempfile.TemporaryDirectory() as directory:
+            analysis = analyze_skill(parse_skill(self.make_skill(directory)))
+        dimensions = analysis["static_analysis"]["dimensions"]
+        self.assertEqual(set(dimensions), set(STATIC_DIMENSIONS))
+        for value in dimensions.values():
+            self.assertTrue({"score", "rating", "summary", "evidence", "strengths", "weaknesses", "recommendations"}.issubset(value))
+
+    def test_skill_profile_extraction_and_strength_detection(self):
+        with tempfile.TemporaryDirectory() as directory:
+            skill = parse_skill(self.make_skill(directory))
+            profile = extract_skill_profile(skill)
+            analysis = analyze_skill(skill)["static_analysis"]
+        self.assertEqual(profile["name"], "Test Resume Review")
+        self.assertTrue(any("简历文本" in item for item in profile["inputs"]))
+        self.assertTrue(analysis["strengths"])
+
+    def test_static_analysis_detects_weakness_audit_and_edges(self):
+        with tempfile.TemporaryDirectory() as directory:
+            skill_dir = Path(directory) / "thin"; skill_dir.mkdir()
+            (skill_dir / "SKILL.md").write_text("# Thin Skill\n\n## 目标\n\n做事。\n", encoding="utf-8")
+            static = analyze_skill(parse_skill(skill_dir))["static_analysis"]
+        self.assertTrue(static["weaknesses"])
+        self.assertTrue(static["instruction_audit"])
+        self.assertTrue(static["edge_case_analysis"])
+
+    def test_static_ai_failure_falls_back_to_rule_analysis(self):
+        with tempfile.TemporaryDirectory() as directory, mock.patch("evalforge.skill_analyzer.ai_skill_analysis", return_value={"status": "error", "model": "mock", "data": None}):
+            result = analyze_skill(parse_skill(self.make_skill(directory)), use_ai=True)
+        self.assertEqual(len(result["static_analysis"]["dimensions"]), 10)
+        self.assertEqual(result["static_analysis"]["ai"]["status"], "error")
+
+    def test_invalid_static_ai_output_falls_back(self):
+        with tempfile.TemporaryDirectory() as directory, mock.patch("evalforge.skill_analyzer.ai_skill_analysis", return_value={"status": "success", "model": "mock", "data": {"profile": {}, "dimensions": {}}}):
+            result = analyze_skill(parse_skill(self.make_skill(directory)), use_ai=True)
+        self.assertEqual(result["static_analysis"]["ai"]["status"], "error")
+        self.assertEqual(len(result["static_analysis"]["dimensions"]), 10)
+
+    def test_valid_static_ai_analysis_is_accepted_with_mock(self):
+        dimensions = {name: {"score": 80, "rating": "strong", "summary": "Validated AI analysis.", "evidence": ["SKILL.md"], "strengths": [], "weaknesses": [], "recommendations": []} for name in STATIC_DIMENSIONS}
+        profile = {"name": "Test Resume Review", "purpose": "Review", "target_scenarios": [], "inputs": [], "outputs": [], "tools": ["mock-tool"], "constraints": [], "prohibitions": [], "workflow_steps": [], "failure_handling": [], "dependencies": []}
+        payload = {"profile": profile, "dimensions": dimensions, "strengths": [], "weaknesses": [], "instruction_issues": [], "edge_case_issues": [], "recommendations": {"P0": [], "P1": [], "P2": []}, "overall_assessment": {}}
+        with tempfile.TemporaryDirectory() as directory, mock.patch("evalforge.skill_analyzer.ai_skill_analysis", return_value={"status": "success", "model": "mock", "data": payload}):
+            result = analyze_skill(parse_skill(self.make_skill(directory)), use_ai=True)
+        self.assertEqual(result["static_analysis"]["ai"]["status"], "success")
+        self.assertEqual(result["static_analysis"]["dimensions"]["goal_clarity"]["score"], 80)
+
+    def test_v02_report_outputs_bilingual_markdown_docx_and_json(self):
+        with tempfile.TemporaryDirectory() as directory:
+            skill = parse_skill(self.make_skill(directory))
+            static = analyze_skill(skill)
+            evaluation = evaluate_cases([], {})
+            evaluation.update(static)
+            report = write_reports(evaluation, Path(directory) / "legacy.md", Path(directory) / "eval_report.json", Path(directory) / "legacy.docx")
+            files = ["eval_report_zh-CN.md", "eval_report_en-US.md", "eval_report_zh-CN.docx", "eval_report_en-US.docx", "eval_report.json"]
+            self.assertTrue(all((Path(directory) / name).is_file() for name in files))
+            self.assertIn("执行摘要", (Path(directory) / files[0]).read_text(encoding="utf-8"))
+            self.assertIn("Executive Summary", (Path(directory) / files[1]).read_text(encoding="utf-8"))
+            self.assertIn("static_analysis", json.loads((Path(directory) / files[-1]).read_text(encoding="utf-8")))
+            from docx import Document
+            self.assertIn("EvalForge 智能体技能评估与审计报告", "\n".join(p.text for p in Document(Path(directory) / files[2]).paragraphs))
+            self.assertIn("EvalForge Evaluation Report", "\n".join(p.text for p in Document(Path(directory) / files[3]).paragraphs))
+        self.assertIn("P1", report["recommendations"])
+
+    def test_report_json_priority_structure_and_final_rubric(self):
+        evaluation = {"results": [{"final_rubric": {"dimension_scores": {"accuracy": 88}, "overall_score": 88, "status": "pass"}, "badcase": None}], "static_analysis": {"overall_score": 70, "overall_rating": "moderate", "dimensions": {}, "strengths": [], "weaknesses": [{"title": "Gap", "severity": "high", "conclusion": "A gap", "evidence": [], "impact": "Risk", "recommendation": "Fix"}], "instruction_audit": [], "edge_case_analysis": []}}
+        report = build_report(evaluation)
+        item = report["recommendations"]["P1"][0]
+        self.assertTrue({"priority", "title", "problem", "evidence", "impact", "suggested_change", "expected_benefit"}.issubset(item))
+        self.assertEqual(report["dynamic_evaluation"]["summary"]["overall_score"], 88)
+
+    def test_cli_report_keeps_v01_arguments_and_generates_v02_outputs(self):
+        with tempfile.TemporaryDirectory() as directory:
+            results = Path(directory) / "results.json"; results.write_text(json.dumps(evaluate_cases([], {})), encoding="utf-8")
+            self.assertEqual(cli_main(["report", str(results), "--markdown-output", str(Path(directory) / "old.md"), "--json-output", str(Path(directory) / "eval_report.json"), "--docx-output", str(Path(directory) / "old.docx")]), 0)
+            self.assertTrue((Path(directory) / "eval_report_en-US.docx").is_file())
+            self.assertTrue((Path(directory) / "old.md").is_file())
+
+    def test_workflow_contains_v02_artifacts(self):
+        root = Path(__file__).resolve().parents[1]
+        workflow = (root / ".github" / "workflows" / "evalforge.yml").read_text(encoding="utf-8")
+        for name in ("eval_cases.json", "eval_results.json", "eval_report.json", "eval_report_zh-CN.md", "eval_report_en-US.md", "eval_report_zh-CN.docx", "eval_report_en-US.docx"):
+            self.assertIn(name, workflow)
+
+    def test_composite_score_is_consistent_across_report_views(self):
+        static = {"overall_score": 70, "overall_rating": "moderate", "dimensions": {"goal_clarity": {"score": 70}}, "strengths": [], "weaknesses": [], "instruction_audit": [], "edge_case_analysis": []}
+        case = {"id": "case_001", "category": "normal", "severity": "low"}
+        report = build_report({"results": evaluate_cases([case], {"case_001": "- 这是足够完整且符合要求的模型响应内容，包含必要解释、建议和可验证的细节。"})["results"], "static_analysis": static})
+        self.assertEqual(report["scorecard"]["static_score"], 70)
+        self.assertEqual(report["scorecard"]["dynamic_score"], 100)
+        self.assertEqual(report["scorecard"]["composite_score"], 84)
+        self.assertEqual(report["summary"]["overall_score"], 84)
+        self.assertEqual(report["final_assessment"]["composite_score"], 84)
+
+    def test_localized_reports_do_not_leak_analysis_prose(self):
+        with tempfile.TemporaryDirectory() as directory:
+            static = analyze_skill(parse_skill(self.make_skill(directory)))
+            evaluation = evaluate_cases([], {})
+            evaluation.update(static)
+            report = build_report(evaluation)
+        zh = markdown_report(report, "zh-CN")
+        en = markdown_report(report, "en-US")
+        for text in ("Static score", "Dynamic score", "Boundary Handling", "The Skill does not"):
+            self.assertNotIn(text, zh)
+        for text in ("目标清晰度", "边界处理", "静态得分", "生产就绪度"):
+            self.assertNotIn(text, en.split("Source quotations below")[0])
+
+    def test_recommendations_have_priority_rationale_and_effort(self):
+        with tempfile.TemporaryDirectory() as directory:
+            report = build_report({**analyze_skill(parse_skill(self.make_skill(directory))), "results": []})
+        self.assertEqual(set(report["recommendations"]), {"P0", "P1", "P2"})
+        self.assertEqual(set(report["recommendation_rationale"]), {"P0", "P1", "P2"})
+        for items in report["recommendations"].values():
+            for item in items:
+                self.assertTrue({"priority", "priority_rationale", "estimated_effort", "expected_benefit"}.issubset(item))

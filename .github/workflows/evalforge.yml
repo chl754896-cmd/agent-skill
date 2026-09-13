@@ -76,6 +76,7 @@ jobs:
         env:
           RESPONSES_PATH: ${{ inputs.responses_path }}
           USE_AI: ${{ inputs.use_ai }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
         run: |
           if [ -n "$RESPONSES_PATH" ] && [ -f "$RESPONSES_PATH" ]; then
             if [ "$USE_AI" = "true" ]; then
@@ -94,7 +95,12 @@ jobs:
           name: evalforge-result
           path: |
             eval_cases.json
+            eval_results.json
             eval_report.md
             eval_report.json
             eval_report.docx
+            eval_report_zh-CN.md
+            eval_report_en-US.md
+            eval_report_zh-CN.docx
+            eval_report_en-US.docx
           if-no-files-found: warn

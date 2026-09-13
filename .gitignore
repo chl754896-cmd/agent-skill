@@ -8,3 +8,17 @@ eval_cases.json
 eval_results.json
 eval_report.md
 eval_report.json
+eval_report.docx
+eval_report_zh-CN.md
+eval_report_en-US.md
+eval_report_zh-CN.docx
+eval_report_en-US.docx
+!examples/resume-review/eval_cases.json
+!examples/resume-review/eval_results.json
+!examples/resume-review/eval_report.md
+!examples/resume-review/eval_report.json
+!examples/resume-review/eval_report.docx
+!examples/resume-review/eval_report_zh-CN.md
+!examples/resume-review/eval_report_en-US.md
+!examples/resume-review/eval_report_zh-CN.docx
+!examples/resume-review/eval_report_en-US.docx

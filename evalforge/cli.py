@@ -9,6 +9,7 @@ from .evaluator import evaluate_cases
 from .generator import generate_cases
 from .parser import SkillNotFoundError, parse_skill
 from .reporter import write_reports
+from .skill_analyzer import analyze_skill
 
 
 def _write_json(path, data):
@@ -17,7 +18,11 @@ def _write_json(path, data):
 
 def command_analyze(args):
     skill = parse_skill(args.skill_path)
-    result = {"skill": skill.to_dict(), "capability_result": extract_capabilities(skill, args.use_ai)}
+    result = {
+        "skill": skill.to_dict(),
+        "capability_result": extract_capabilities(skill, args.use_ai),
+        **analyze_skill(skill, args.use_ai),
+    }
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0
 
@@ -26,6 +31,7 @@ def command_generate(args):
     skill = parse_skill(args.skill_path)
     capability_result = extract_capabilities(skill, args.use_ai)
     result = generate_cases(skill, capability_result, args.use_ai)
+    result.update({"skill_path": str(args.skill_path), **analyze_skill(skill, args.use_ai)})
     _write_json(args.output, result)
     print(f"已生成 {len(result['cases'])} 个测试 Case：{args.output}")
     return 0
@@ -38,6 +44,9 @@ def command_evaluate(args):
     if args.responses:
         responses = json.loads(Path(args.responses).read_text(encoding="utf-8"))
     evaluation = evaluate_cases(cases, responses, args.use_ai)
+    for key in ("skill", "skill_path", "skill_profile", "static_analysis"):
+        if isinstance(case_data, dict) and key in case_data:
+            evaluation[key] = case_data[key]
     _write_json(args.output, evaluation)
     print(f"已完成 {len(cases)} 个 Case 的评测：{args.output}")
     return 0
@@ -46,7 +55,7 @@ def command_evaluate(args):
 def command_report(args):
     evaluation = json.loads(Path(args.results_path).read_text(encoding="utf-8"))
     write_reports(evaluation, args.markdown_output, args.json_output, args.docx_output)
-    print(f"已生成报告：{args.markdown_output}、{args.json_output}、{args.docx_output}")
+    print("已生成报告：eval_report_zh-CN.md、eval_report_en-US.md、eval_report_zh-CN.docx、eval_report_en-US.docx，以及兼容旧版的输出文件。")
     return 0
 
 

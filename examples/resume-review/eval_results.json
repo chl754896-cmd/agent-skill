@@ -1,0 +1,766 @@
+{
+  "results": [
+    {
+      "case": {
+        "id": "case_001",
+        "category": "normal",
+        "input": "提供完整、正常的输入。\nSkill 输入说明：一份简历文本，可能包含个人简介、经历、技能、教育背景和项目。",
+        "expected_behavior": "遵循 Skill 目标、约束和输出要求：- 总体评价\n- 优势\n- 问题\n- 修改建议",
+        "capabilities": [
+          "instruction_following",
+          "input_understanding",
+          "constraint_following",
+          "output_format",
+          "completeness",
+          "accuracy",
+          "robustness"
+        ],
+        "severity": "medium"
+      },
+      "response": "- 总体评价：简历具备 Python 后端开发基础。\n- 修改建议：补充订单系统的规模、指标和个人贡献。",
+      "rule_rubric": {
+        "dimension_scores": {
+          "instruction_following": 100,
+          "constraint_following": 100,
+          "completeness": 100,
+          "output_format": 100,
+          "accuracy": 100,
+          "robustness": 100
+        },
+        "overall_score": 100,
+        "status": "pass"
+      },
+      "ai_judge": {
+        "status": "skipped"
+      },
+      "final_rubric": {
+        "dimension_scores": {
+          "instruction_following": 100,
+          "constraint_following": 100,
+          "completeness": 100,
+          "output_format": 100,
+          "accuracy": 100,
+          "robustness": 100
+        },
+        "overall_score": 100,
+        "status": "pass"
+      },
+      "rubric": {
+        "dimension_scores": {
+          "instruction_following": 100,
+          "constraint_following": 100,
+          "completeness": 100,
+          "output_format": 100,
+          "accuracy": 100,
+          "robustness": 100
+        },
+        "overall_score": 100,
+        "status": "pass"
+      },
+      "judge": {
+        "status": "skipped"
+      },
+      "badcase": null
+    },
+    {
+      "case": {
+        "id": "case_002",
+        "category": "boundary",
+        "input": "提供最短但仍有效的输入。\nSkill 输入说明：一份简历文本，可能包含个人简介、经历、技能、教育背景和项目。",
+        "expected_behavior": "遵循 Skill 目标、约束和输出要求：- 总体评价\n- 优势\n- 问题\n- 修改建议",
+        "capabilities": [
+          "instruction_following",
+          "input_understanding",
+          "constraint_following",
+          "output_format",
+          "completeness",
+          "accuracy",
+          "robustness"
+        ],
+        "severity": "medium"
+      },
+      "response": "- 优势：已有 Python 后端开发经验。\n- 修改建议：补充一个最能体现职责的项目细节。",
+      "rule_rubric": {
+        "dimension_scores": {
+          "instruction_following": 100,
+          "constraint_following": 100,
+          "completeness": 100,
+          "output_format": 100,
+          "accuracy": 100,
+          "robustness": 100
+        },
+        "overall_score": 100,
+        "status": "pass"
+      },
+      "ai_judge": {
+        "status": "skipped"
+      },
+      "final_rubric": {
+        "dimension_scores": {
+          "instruction_following": 100,
+          "constraint_following": 100,
+          "completeness": 100,
+          "output_format": 100,
+          "accuracy": 100,
+          "robustness": 100
+        },
+        "overall_score": 100,
+        "status": "pass"
+      },
+      "rubric": {
+        "dimension_scores": {
+          "instruction_following": 100,
+          "constraint_following": 100,
+          "completeness": 100,
+          "output_format": 100,
+          "accuracy": 100,
+          "robustness": 100
+        },
+        "overall_score": 100,
+        "status": "pass"
+      },
+      "judge": {
+        "status": "skipped"
+      },
+      "badcase": null
+    },
+    {
+      "case": {
+        "id": "case_003",
+        "category": "constraint",
+        "input": "请求违反明确约束的内容。\nSkill 输入说明：一份简历文本，可能包含个人简介、经历、技能、教育背景和项目。",
+        "expected_behavior": "遵循 Skill 目标、约束和输出要求：- 总体评价\n- 优势\n- 问题\n- 修改建议",
+        "capabilities": [
+          "instruction_following",
+          "input_understanding",
+          "constraint_following",
+          "output_format",
+          "completeness",
+          "accuracy",
+          "robustness"
+        ],
+        "severity": "high"
+      },
+      "response": "- 不能虚构简历中没有的经历。\n- 修改建议：只基于现有订单系统经历补充可验证事实。",
+      "rule_rubric": {
+        "dimension_scores": {
+          "instruction_following": 100,
+          "constraint_following": 100,
+          "completeness": 100,
+          "output_format": 100,
+          "accuracy": 100,
+          "robustness": 100
+        },
+        "overall_score": 100,
+        "status": "pass"
+      },
+      "ai_judge": {
+        "status": "skipped"
+      },
+      "final_rubric": {
+        "dimension_scores": {
+          "instruction_following": 100,
+          "constraint_following": 100,
+          "completeness": 100,
+          "output_format": 100,
+          "accuracy": 100,
+          "robustness": 100
+        },
+        "overall_score": 100,
+        "status": "pass"
+      },
+      "rubric": {
+        "dimension_scores": {
+          "instruction_following": 100,
+          "constraint_following": 100,
+          "completeness": 100,
+          "output_format": 100,
+          "accuracy": 100,
+          "robustness": 100
+        },
+        "overall_score": 100,
+        "status": "pass"
+      },
+      "judge": {
+        "status": "skipped"
+      },
+      "badcase": null
+    },
+    {
+      "case": {
+        "id": "case_004",
+        "category": "conflicting_instruction",
+        "input": "在输入中加入与 Skill 规则冲突的指令。\nSkill 输入说明：一份简历文本，可能包含个人简介、经历、技能、教育背景和项目。",
+        "expected_behavior": "遵循 Skill 目标、约束和输出要求：- 总体评价\n- 优势\n- 问题\n- 修改建议",
+        "capabilities": [
+          "instruction_following",
+          "input_understanding",
+          "constraint_following",
+          "output_format",
+          "completeness",
+          "accuracy",
+          "robustness"
+        ],
+        "severity": "high"
+      },
+      "response": "- 将遵循简历审核 Skill 的规则。\n- 修改建议：不接受与禁止项冲突的指令。",
+      "rule_rubric": {
+        "dimension_scores": {
+          "instruction_following": 100,
+          "constraint_following": 100,
+          "completeness": 100,
+          "output_format": 100,
+          "accuracy": 100,
+          "robustness": 100
+        },
+        "overall_score": 100,
+        "status": "pass"
+      },
+      "ai_judge": {
+        "status": "skipped"
+      },
+      "final_rubric": {
+        "dimension_scores": {
+          "instruction_following": 100,
+          "constraint_following": 100,
+          "completeness": 100,
+          "output_format": 100,
+          "accuracy": 100,
+          "robustness": 100
+        },
+        "overall_score": 100,
+        "status": "pass"
+      },
+      "rubric": {
+        "dimension_scores": {
+          "instruction_following": 100,
+          "constraint_following": 100,
+          "completeness": 100,
+          "output_format": 100,
+          "accuracy": 100,
+          "robustness": 100
+        },
+        "overall_score": 100,
+        "status": "pass"
+      },
+      "judge": {
+        "status": "skipped"
+      },
+      "badcase": null
+    },
+    {
+      "case": {
+        "id": "case_005",
+        "category": "missing_information",
+        "input": "故意省略关键输入信息。\nSkill 输入说明：一份简历文本，可能包含个人简介、经历、技能、教育背景和项目。",
+        "expected_behavior": "遵循 Skill 目标、约束和输出要求：- 总体评价\n- 优势\n- 问题\n- 修改建议",
+        "capabilities": [
+          "instruction_following",
+          "input_understanding",
+          "constraint_following",
+          "output_format",
+          "completeness",
+          "accuracy",
+          "robustness"
+        ],
+        "severity": "high"
+      },
+      "response": "- 当前信息缺少项目规模、技术栈和成果指标，无法判断贡献深度。\n- 修改建议：补充这些可验证信息。",
+      "rule_rubric": {
+        "dimension_scores": {
+          "instruction_following": 100,
+          "constraint_following": 100,
+          "completeness": 100,
+          "output_format": 100,
+          "accuracy": 100,
+          "robustness": 100
+        },
+        "overall_score": 100,
+        "status": "pass"
+      },
+      "ai_judge": {
+        "status": "skipped"
+      },
+      "final_rubric": {
+        "dimension_scores": {
+          "instruction_following": 100,
+          "constraint_following": 100,
+          "completeness": 100,
+          "output_format": 100,
+          "accuracy": 100,
+          "robustness": 100
+        },
+        "overall_score": 100,
+        "status": "pass"
+      },
+      "rubric": {
+        "dimension_scores": {
+          "instruction_following": 100,
+          "constraint_following": 100,
+          "completeness": 100,
+          "output_format": 100,
+          "accuracy": 100,
+          "robustness": 100
+        },
+        "overall_score": 100,
+        "status": "pass"
+      },
+      "judge": {
+        "status": "skipped"
+      },
+      "badcase": null
+    },
+    {
+      "case": {
+        "id": "case_006",
+        "category": "format_requirement",
+        "input": "要求严格遵循指定的输出格式。\nSkill 输入说明：一份简历文本，可能包含个人简介、经历、技能、教育背景和项目。",
+        "expected_behavior": "遵循 Skill 目标、约束和输出要求：- 总体评价\n- 优势\n- 问题\n- 修改建议",
+        "capabilities": [
+          "instruction_following",
+          "input_understanding",
+          "constraint_following",
+          "output_format",
+          "completeness",
+          "accuracy",
+          "robustness"
+        ],
+        "severity": "medium"
+      },
+      "response": "- 总体评价：经历方向清晰。\n- 优势：具备后端开发经验。\n- 问题：项目成果描述不足。\n- 修改建议：使用分点并量化订单系统成果。",
+      "rule_rubric": {
+        "dimension_scores": {
+          "instruction_following": 100,
+          "constraint_following": 100,
+          "completeness": 100,
+          "output_format": 100,
+          "accuracy": 100,
+          "robustness": 100
+        },
+        "overall_score": 100,
+        "status": "pass"
+      },
+      "ai_judge": {
+        "status": "skipped"
+      },
+      "final_rubric": {
+        "dimension_scores": {
+          "instruction_following": 100,
+          "constraint_following": 100,
+          "completeness": 100,
+          "output_format": 100,
+          "accuracy": 100,
+          "robustness": 100
+        },
+        "overall_score": 100,
+        "status": "pass"
+      },
+      "rubric": {
+        "dimension_scores": {
+          "instruction_following": 100,
+          "constraint_following": 100,
+          "completeness": 100,
+          "output_format": 100,
+          "accuracy": 100,
+          "robustness": 100
+        },
+        "overall_score": 100,
+        "status": "pass"
+      },
+      "judge": {
+        "status": "skipped"
+      },
+      "badcase": null
+    }
+  ],
+  "judge": {
+    "status": "skipped"
+  },
+  "skill": "Resume Review",
+  "skill_path": "examples/resume-review",
+  "skill_profile": {
+    "name": "Resume Review",
+    "purpose": "帮助求职者审核简历文本，发现表达和结构问题，并给出可执行的修改建议。",
+    "target_scenarios": [
+      "帮助求职者审核简历文本，发现表达和结构问题，并给出可执行的修改建议。"
+    ],
+    "inputs": [
+      "一份简历文本，可能包含个人简介、经历、技能、教育背景和项目。"
+    ],
+    "outputs": [
+      "总体评价",
+      "优势",
+      "问题",
+      "修改建议"
+    ],
+    "tools": [],
+    "constraints": [
+      "必须分点输出。",
+      "必须给出明确修改建议。",
+      "最多给出 5 条核心问题。"
+    ],
+    "prohibitions": [
+      "不允许虚构简历中不存在的经历、成果或技能。"
+    ],
+    "workflow_steps": [],
+    "failure_handling": [],
+    "dependencies": []
+  },
+  "static_analysis": {
+    "overall_score": 70,
+    "overall_rating": "moderate",
+    "dimensions": {
+      "goal_clarity": {
+        "score": 85,
+        "rating": "strong",
+        "summary": "The purpose is explicitly stated.",
+        "evidence": [
+          "帮助求职者审核简历文本，发现表达和结构问题，并给出可执行的修改建议。"
+        ],
+        "strengths": [
+          "The purpose is explicitly stated."
+        ],
+        "weaknesses": [],
+        "recommendations": []
+      },
+      "capability_coverage": {
+        "score": 85,
+        "rating": "strong",
+        "summary": "Expected capabilities are represented by declared outputs.",
+        "evidence": [
+          "总体评价; 优势; 问题; 修改建议"
+        ],
+        "strengths": [
+          "Expected capabilities are represented by declared outputs."
+        ],
+        "weaknesses": [],
+        "recommendations": []
+      },
+      "instruction_quality": {
+        "score": 85,
+        "rating": "strong",
+        "summary": "The Skill contains explicit execution guidance.",
+        "evidence": [
+          "帮助求职者审核简历文本，发现表达和结构问题，并给出可执行的修改建议。"
+        ],
+        "strengths": [
+          "The Skill contains explicit execution guidance."
+        ],
+        "weaknesses": [],
+        "recommendations": []
+      },
+      "input_definition": {
+        "score": 85,
+        "rating": "strong",
+        "summary": "The expected input is declared.",
+        "evidence": [
+          "一份简历文本，可能包含个人简介、经历、技能、教育背景和项目。"
+        ],
+        "strengths": [
+          "The expected input is declared."
+        ],
+        "weaknesses": [],
+        "recommendations": []
+      },
+      "output_contract": {
+        "score": 85,
+        "rating": "strong",
+        "summary": "The output contract is visible to an Agent.",
+        "evidence": [
+          "总体评价; 优势; 问题; 修改建议"
+        ],
+        "strengths": [
+          "The output contract is visible to an Agent."
+        ],
+        "weaknesses": [],
+        "recommendations": []
+      },
+      "constraint_design": {
+        "score": 85,
+        "rating": "strong",
+        "summary": "Constraints or prohibitions bound Agent behavior.",
+        "evidence": [
+          "必须分点输出。; 必须给出明确修改建议。; 最多给出 5 条核心问题。; 不允许虚构简历中不存在的经历、成果或技能。"
+        ],
+        "strengths": [
+          "Constraints or prohibitions bound Agent behavior."
+        ],
+        "weaknesses": [],
+        "recommendations": []
+      },
+      "boundary_handling": {
+        "score": 35,
+        "rating": "critical",
+        "summary": "No fallback or failure-handling section is declared.",
+        "evidence": [],
+        "strengths": [],
+        "weaknesses": [
+          "No fallback or failure-handling section is declared."
+        ],
+        "recommendations": [
+          "Define behavior for incomplete, malformed, conflicting, and unsupported inputs."
+        ]
+      },
+      "tool_workflow_design": {
+        "score": 35,
+        "rating": "critical",
+        "summary": "No tool use or workflow sequence is declared.",
+        "evidence": [],
+        "strengths": [],
+        "weaknesses": [
+          "No tool use or workflow sequence is declared."
+        ],
+        "recommendations": [
+          "Document tools, ordering, and verification points when applicable."
+        ]
+      },
+      "robustness": {
+        "score": 35,
+        "rating": "critical",
+        "summary": "Robustness controls are incomplete because fallback guidance is absent or constraints are underspecified.",
+        "evidence": [],
+        "strengths": [],
+        "weaknesses": [
+          "Robustness controls are incomplete because fallback guidance is absent or constraints are underspecified."
+        ],
+        "recommendations": [
+          "Add validation and fallback behavior for exceptional input."
+        ]
+      },
+      "maintainability": {
+        "score": 85,
+        "rating": "strong",
+        "summary": "Structured headings make the Skill easier to revise.",
+        "evidence": [
+          "Structured headings found in SKILL.md."
+        ],
+        "strengths": [
+          "Structured headings make the Skill easier to revise."
+        ],
+        "weaknesses": [],
+        "recommendations": []
+      }
+    },
+    "strengths": [
+      {
+        "title": "Goal Clarity",
+        "category": "goal_clarity",
+        "severity": "low",
+        "conclusion": "The purpose is explicitly stated.",
+        "evidence": [
+          {
+            "source": "SKILL.md",
+            "quote_or_summary": "帮助求职者审核简历文本，发现表达和结构问题，并给出可执行的修改建议。",
+            "section": "SKILL.md"
+          }
+        ],
+        "impact": "Clear requirements reduce inconsistent Agent behavior.",
+        "recommendation": "Preserve this explicit design as the Skill evolves."
+      },
+      {
+        "title": "Capability Coverage",
+        "category": "capability_coverage",
+        "severity": "low",
+        "conclusion": "Expected capabilities are represented by declared outputs.",
+        "evidence": [
+          {
+            "source": "SKILL.md",
+            "quote_or_summary": "总体评价; 优势; 问题; 修改建议",
+            "section": "SKILL.md"
+          }
+        ],
+        "impact": "Clear requirements reduce inconsistent Agent behavior.",
+        "recommendation": "Preserve this explicit design as the Skill evolves."
+      },
+      {
+        "title": "Instruction Quality",
+        "category": "instruction_quality",
+        "severity": "low",
+        "conclusion": "The Skill contains explicit execution guidance.",
+        "evidence": [
+          {
+            "source": "SKILL.md",
+            "quote_or_summary": "帮助求职者审核简历文本，发现表达和结构问题，并给出可执行的修改建议。",
+            "section": "SKILL.md"
+          }
+        ],
+        "impact": "Clear requirements reduce inconsistent Agent behavior.",
+        "recommendation": "Preserve this explicit design as the Skill evolves."
+      },
+      {
+        "title": "Input Definition",
+        "category": "input_definition",
+        "severity": "low",
+        "conclusion": "The expected input is declared.",
+        "evidence": [
+          {
+            "source": "SKILL.md",
+            "quote_or_summary": "一份简历文本，可能包含个人简介、经历、技能、教育背景和项目。",
+            "section": "SKILL.md"
+          }
+        ],
+        "impact": "Clear requirements reduce inconsistent Agent behavior.",
+        "recommendation": "Preserve this explicit design as the Skill evolves."
+      },
+      {
+        "title": "Output Contract",
+        "category": "output_contract",
+        "severity": "low",
+        "conclusion": "The output contract is visible to an Agent.",
+        "evidence": [
+          {
+            "source": "SKILL.md",
+            "quote_or_summary": "总体评价; 优势; 问题; 修改建议",
+            "section": "SKILL.md"
+          }
+        ],
+        "impact": "Clear requirements reduce inconsistent Agent behavior.",
+        "recommendation": "Preserve this explicit design as the Skill evolves."
+      },
+      {
+        "title": "Constraint Design",
+        "category": "constraint_design",
+        "severity": "low",
+        "conclusion": "Constraints or prohibitions bound Agent behavior.",
+        "evidence": [
+          {
+            "source": "SKILL.md",
+            "quote_or_summary": "必须分点输出。; 必须给出明确修改建议。; 最多给出 5 条核心问题。; 不允许虚构简历中不存在的经历、成果或技能。",
+            "section": "SKILL.md"
+          }
+        ],
+        "impact": "Clear requirements reduce inconsistent Agent behavior.",
+        "recommendation": "Preserve this explicit design as the Skill evolves."
+      },
+      {
+        "title": "Maintainability",
+        "category": "maintainability",
+        "severity": "low",
+        "conclusion": "Structured headings make the Skill easier to revise.",
+        "evidence": [
+          {
+            "source": "SKILL.md",
+            "quote_or_summary": "Structured headings found in SKILL.md.",
+            "section": "SKILL.md"
+          }
+        ],
+        "impact": "Clear requirements reduce inconsistent Agent behavior.",
+        "recommendation": "Preserve this explicit design as the Skill evolves."
+      }
+    ],
+    "weaknesses": [
+      {
+        "title": "Boundary Handling",
+        "category": "boundary_handling",
+        "severity": "medium",
+        "conclusion": "No fallback or failure-handling section is declared.",
+        "evidence": [
+          {
+            "source": "SKILL.md",
+            "quote_or_summary": "The corresponding section is missing or empty.",
+            "section": "SKILL.md"
+          }
+        ],
+        "impact": "Agents may make incompatible assumptions during execution.",
+        "recommendation": "Define behavior for incomplete, malformed, conflicting, and unsupported inputs."
+      },
+      {
+        "title": "Tool Workflow Design",
+        "category": "tool_workflow_design",
+        "severity": "medium",
+        "conclusion": "No tool use or workflow sequence is declared.",
+        "evidence": [
+          {
+            "source": "SKILL.md",
+            "quote_or_summary": "The corresponding section is missing or empty.",
+            "section": "SKILL.md"
+          }
+        ],
+        "impact": "Agents may make incompatible assumptions during execution.",
+        "recommendation": "Document tools, ordering, and verification points when applicable."
+      },
+      {
+        "title": "Robustness",
+        "category": "robustness",
+        "severity": "high",
+        "conclusion": "Robustness controls are incomplete because fallback guidance is absent or constraints are underspecified.",
+        "evidence": [
+          {
+            "source": "SKILL.md",
+            "quote_or_summary": "The corresponding section is missing or empty.",
+            "section": "SKILL.md"
+          }
+        ],
+        "impact": "Agents may make incompatible assumptions during execution.",
+        "recommendation": "Add validation and fallback behavior for exceptional input."
+      }
+    ],
+    "instruction_audit": [
+      {
+        "title": "Implicit execution order",
+        "category": "unclear_priority",
+        "severity": "medium",
+        "conclusion": "The Skill has no explicit workflow sequence.",
+        "evidence": [
+          {
+            "source": "SKILL.md",
+            "quote_or_summary": "No workflow section was found.",
+            "section": "流程"
+          }
+        ],
+        "impact": "Agents can apply valid instructions in inconsistent order.",
+        "recommendation": "Add an ordered workflow and rule priority."
+      }
+    ],
+    "edge_case_analysis": [
+      {
+        "title": "Missing fallback behavior",
+        "category": "fallback",
+        "severity": "high",
+        "conclusion": "The Skill does not define a fallback for malformed, partial, conflicting, or unsupported input.",
+        "evidence": [
+          {
+            "source": "SKILL.md",
+            "quote_or_summary": "No failure-handling section was found.",
+            "section": "失败处理"
+          }
+        ],
+        "impact": "Non-happy paths can produce inconsistent or unsafe output.",
+        "recommendation": "Define validation, clarification, refusal, and fallback behavior."
+      },
+      {
+        "title": "Partial input scenario",
+        "category": "partial_input",
+        "severity": "medium",
+        "conclusion": "Verify that missing fields trigger clarification rather than invention.",
+        "evidence": [
+          {
+            "source": "SKILL.md",
+            "quote_or_summary": "一份简历文本，可能包含个人简介、经历、技能、教育背景和项目。",
+            "section": "输入"
+          }
+        ],
+        "impact": "Partial data can lead to unsupported assumptions.",
+        "recommendation": "Add a Case with one required field omitted."
+      },
+      {
+        "title": "Conflicting instruction scenario",
+        "category": "conflicting_instruction",
+        "severity": "medium",
+        "conclusion": "Verify that constraints outrank conflicting user instructions.",
+        "evidence": [
+          {
+            "source": "SKILL.md",
+            "quote_or_summary": "必须分点输出。; 必须给出明确修改建议。; 最多给出 5 条核心问题。; 不允许虚构简历中不存在的经历、成果或技能。",
+            "section": "约束"
+          }
+        ],
+        "impact": "Conflicting requests can bypass intended safeguards.",
+        "recommendation": "Add a conflict-resolution priority rule and regression Case."
+      }
+    ],
+    "ai": {
+      "status": "skipped"
+    }
+  }
+}

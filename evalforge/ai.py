@@ -24,3 +24,27 @@ def ai_json(prompt, client_factory=None):
         return {"status": "success", "model": model, "data": json.loads(response.output_text)}
     except Exception:
         return {"status": "error", "model": model, "data": None}
+
+
+def ai_skill_analysis(skill, client_factory=None):
+    """Request a single validated, structured static audit from DeepSeek.
+
+    A single request keeps the optional enhancement inexpensive while assigning
+    the model the Capability Analyst, Strength/Weakness Analyst, Instruction
+    Auditor, Edge-case Analyst, Root Cause Analyst, and Recommendation
+    Generator roles.  Consumers still validate the payload before using it.
+    """
+    prompt = (
+        "You are an Agent Skill capability analyst, instruction auditor, edge-case analyst, "
+        "root-cause analyst, and recommendation generator. Return JSON only with: "
+        "profile, dimensions, strengths, weaknesses, instruction_issues, edge_case_issues, "
+        "recommendations (P0/P1/P2), overall_assessment. Profile must use name, purpose, "
+        "target_scenarios, inputs, outputs, tools, constraints, prohibitions, workflow_steps, "
+        "failure_handling, dependencies. Dimensions must include goal_clarity, capability_coverage, "
+        "instruction_quality, input_definition, output_contract, constraint_design, boundary_handling, "
+        "tool_workflow_design, robustness, maintainability. Every dimension must include score 0-100, "
+        "rating, summary, evidence, strengths, weaknesses, recommendations. Findings must explain "
+        "conclusion, evidence, impact, and recommendation. Do not invent content absent from the Skill.\n"
+        f"Skill: {skill.to_dict()}"
+    )
+    return ai_json(prompt, client_factory=client_factory)
